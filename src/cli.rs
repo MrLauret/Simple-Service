@@ -10,7 +10,8 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     Add {
-        path: String,
+        ip: String,
+        port: u16,
         name: String
     },
 
@@ -18,9 +19,21 @@ pub enum Commands {
         name: String
     },
 
-    Return {
+    GetIp {
         name: String
     },
+
+    Update {
+        action: String,
+        name: String,
+        new_value: String
+    },
+
+    Test {
+        name: String
+    },
+
+    TestAll,
 
     List,
 }

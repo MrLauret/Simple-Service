@@ -1,38 +1,54 @@
 mod store;
 mod cli;
 
+use tokio;
 use clap::Parser;
-use store::DirList;
+use store::ServiceList;
 use cli::{Commands, Cli};
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let args = Cli::parse();
 
-    let mut directories = DirList::load();
+    let mut services = ServiceList::load();
 
     match args.command {
-        Commands::Add { path, name } => {
-            match directories.add(&path, &name) {
-                Ok(_) => println!("\nAdded directory {name} as {path}"),
+        Commands::Add { ip, port, name } => {
+            match services.add(&ip, &port, &name) {
+                Ok(_) => println!("\nAdded service {name} as {ip}"),
                 Err(e) => println!("\n{e}")
             };
         },
         Commands::Delete { name } => {
-            match directories.delete(&name) {
-                Ok(_) => println!("\nDeleted directory {name}"),
+            match services.delete(&name) {
+                Ok(_) => println!("\nDeleted service {name}"),
                 Err(e) => println!("\n{e}")
             };
         },
         Commands::List => {
-            println!("Your directories:\n");
-            directories.list();
+            println!("Your services:\n");
+            services.list();
         },
-        Commands::Return { name } => {
-            match directories.get_path(&name) {
+        Commands::GetIp { name } => {
+            match services.get_ip(&name) {
                 Ok(pth) => println!("{pth}"),
                 Err(e) => println!("{e}")
             }
+        },
+        Commands::TestAll => {
+            services.test_all().await
+        },
+        Commands::Test { name } => {
+            match services.test(&name).await {
+                Ok(state) => println!("name: {state}"),
+                Err(e) => println!("{e}")
+            }
+        },
+        Commands::Update { action, name, new_value } => {
+            match services.update(&action, &name, &new_value) {
+                Ok(_) => println!("{name}'s {} now is {new_value}", action.to_lowercase()),
+                Err(e) => println!("{e}")
+            } 
         }
     }
 }
-

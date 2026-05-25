@@ -1,92 +1,37 @@
-# fastdir
+Features
 
-A simple command-line tool for saving, managing, and quickly returning to directories by name.
+    Concurrent Scanning: Checks the status of all your saved services at the exact same time instead of waiting for them one-by-one.
 
-Instead of remembering long paths, register directories once and jump to them instantly from your shell.
+    Automatic Timeouts: Smart connection management that drops dead or hanging network targets automatically so your application never freezes.
 
----
+    Permanent Storage: Saves your services locally in a clean text file inside your home directory so your data is never lost when you close the app.
 
-## Features
+    Resource Efficient: Uses minimal system resources and memory by leveraging Rust's fast compilation and execution model.
 
-- Add directories with a custom name
-- Delete saved directories
-- List all saved directories
-- Return a directory path by name (for shell `cd` usage)
-- Stores data locally in a JSON file in your home directory
+Architecture Overview
 
----
+Traditional monitoring tools check hosts sequentially, meaning one dead or lagging IP will cause the entire application to stutter or hang.
 
-## Installation
+Simple Service uses a cooperative scheduling model. The moment a connection request is sent out to a server, the application shifts its focus to fire off the next check immediately. This ensures that fast responders report back instantly, while slower, offline hosts are handled gracefully in the background.
+How It Works
 
-### Build from source
+The application operates through a straightforward command pipeline split into two main sections:
+1. Registry Management (CRUD)
 
-```bash
-git clone https://github.com/your-username/fastdir
-cd fastdir
-cargo build --release
+    Add: Input an IP address, connection port, and a custom nickname to register a new service.
 
-Binary output:
+    List: View all currently monitored endpoints, their saved network configurations, and assigned names.
 
-target/release/fastdir
+    Update: Modify any existing parameter (such as a changing IP address or port number) without needing to delete the entry.
 
-(Optional) move it into your PATH:
+    Delete: Permanently remove an old or unneeded service profile from your local database.
 
-sudo mv target/release/fastdir /usr/local/bin/
-Usage
-Add a directory
-fastdir add /path/to/project myproject
-Delete a directory
-fastdir delete myproject
-List directories
-fastdir list
+2. Network Testing Engine
 
-Example output:
+    Single Test: Targets a specific service by name to determine if it is responsive.
 
-Your directories:
+    Test All: Triggers the core asynchronous engine to ping every single registered device at the exact same moment, printing a clean list of live and dead connections as they report back.
 
-myproject: /path/to/project
-backend: /home/user/backend
-Return a directory (for cd)
+Data Storage
 
-Prints the stored path:
-
-fastdir return myproject
-
-Use it with cd:
-
-cd "$(fastdir return myproject)"
-
-Or make a helper function:
-
-d() {
-    cd "$(fastdir return "$1")"
-}
-
-Then:
-
-d myproject
-Data storage
-
-Directories are stored in:
-
-~/dirs.json
-
-Example format:
-
-[
-  {
-    "name": "myproject",
-    "path": "/home/user/projects/myproject"
-  }
-]
-Project structure
-src/
-├── main.rs
-├── cli.rs
-├── store.rs
-main.rs → CLI routing
-cli.rs → command definitions (clap)
-store.rs → storage + logic
-Why this exists
-
-A lightweight alternative to directory jump tools like zoxide, focused on simplicity and full control.
+All your configuration data is stored locally on your machine inside your user profile folder in a file named service_registry.json. This keeps your network configurations completely private, accessible offline, and easy to back up.
