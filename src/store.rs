@@ -66,10 +66,7 @@ impl ServiceList {
     }
 
     pub fn delete(&mut self, name: &String) -> Result<(), &'static str> {
-        let index = match self.get_index(name) {
-            Ok(idx) => idx,
-            Err(e) => return Err(e)
-        };
+        let index = self.get_index(name)?;
 
         self.services.remove(index);
         self.save();
@@ -90,10 +87,7 @@ impl ServiceList {
     }
 
     pub async fn test(&self, name: &String) -> Result<&'static str, &'static str> {
-        let idx = match self.get_index(name) {
-            Ok(idx) => idx,
-            Err(e) => return Err(e)
-        };
+        let idx = self.get_index(name)?;
         let service = self.services[idx].clone();
 
         match ping_ip(service.ip, service.port).await {
@@ -131,10 +125,7 @@ impl ServiceList {
         match action.to_lowercase().as_str() {
             "port" => {
                 let new_port: u16 = new_val.parse().expect("Must be an integer");
-                let idx = match self.get_index(name) {
-                    Ok(idx) => idx,
-                    Err(e) => return Err(e)
-                };
+                let idx = self.get_index(name)?;
                 let service = &mut self.services[idx];
 
                 service.port = new_port;
@@ -145,10 +136,7 @@ impl ServiceList {
                 if self.get_index(new_val).is_ok() {
                     return Err("Service with that name already exists")
                 }
-                let idx = match self.get_index(name) {
-                    Ok(idx) => idx,
-                    Err(e) => return Err(e)
-                };
+                let idx = self.get_index(name)?;
                 let service = &mut self.services[idx];
 
                 service.name = new_val.clone();
@@ -156,10 +144,7 @@ impl ServiceList {
                 Ok(())
             },
             "ip" => {
-                let idx = match self.get_index(name) {
-                    Ok(idx) => idx,
-                    Err(e) => return Err(e)
-                };
+                let idx = self.get_index(name)?;
                 let service = &mut self.services[idx];
 
                 service.ip = new_val.clone();
